@@ -1,0 +1,6 @@
+# created by virtualenv automatically
+config.py
+turtle.py
+venv/
+.idea/
+__pycache__/
