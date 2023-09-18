@@ -1,3 +1,4 @@
+from tortoise.fields import OnDelete
 from tortoise.models import Model
 from tortoise import fields
 from aiogram.fsm.state import State, StatesGroup
@@ -8,6 +9,12 @@ class Tags(StatesGroup):
     hashtag = State()
 
 
+class TagToDelete(StatesGroup):
+    user_id = State()
+    hashtag = State()
+    confirm = State()
+
+
 class Users(Model):
     id = fields.IntField(pk=True)
     user = fields.IntField(unique=True)
@@ -15,4 +22,4 @@ class Users(Model):
 
 class Hashtags(Model):
     hashtag = fields.CharField(max_length=255)
-    user = fields.relational.ForeignKeyField("models.Users", related_name='user_hashtags')
+    user = fields.relational.ForeignKeyField("models.Users", related_name='user_hashtags', on_delete=OnDelete.CASCADE)

@@ -1,0 +1,6 @@
+This bot is developed to help you follow most interesting topics
+/start - put user and his first tag into bot
+/add - put new tag into bot
+/delete - delete one or all tags
+/cancel - cancel any action on any step
+/help - show list of commands
