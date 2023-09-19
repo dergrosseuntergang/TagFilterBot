@@ -37,6 +37,11 @@ async def deleter(data:  dict[str, Any]) -> None:
         print("Object not found")
 
 
+async def checker(user: int):
+    inserted = await Users.filter(user=user)
+    return inserted is not None
+
+
 def confirm_kb():
     kb = [
         [

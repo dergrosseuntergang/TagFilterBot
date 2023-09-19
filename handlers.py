@@ -1,15 +1,16 @@
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 
-from functions import putter, sender, deleter, confirm_kb, del_all_kb
+from functions import putter, sender, deleter, confirm_kb, del_all_kb, checker
 from models import *
 from config import CHANNEL_NAME
-from filters import ChatNameFilter, StartOrAdd
-
+from filters import ChatNameFilter
+from middlewares import CounterMiddleware
 router = Router()
 cp_router = Router()
+router.message.middleware(CounterMiddleware())
 
 
 @cp_router.channel_post(ChatNameFilter(CHANNEL_NAME))
@@ -20,8 +21,10 @@ async def channel_post_handler(channel_post: types.Message, bot) -> None:
     await sender(tags, channel_post, bot)
 
 
-@router.message(StartOrAdd())
+@router.message(CommandStart(), flags={"once": True})
+@router.message(Command('add'))
 async def command_start_handler(message: Message, state: FSMContext) -> None:
+
     await state.set_state(Tags.user_id)
     await state.update_data(user_id=message.chat.id)
     await state.set_state(Tags.hashtag)
@@ -42,11 +45,10 @@ async def delete_single_tag(message: Message, state: FSMContext) -> None:
 
 @router.message(F.text == 'Отмена', TagToDelete.confirm)
 @router.message(Command("cancel"))
-async def cancel_handler(message: Message, state: FSMContext) -> None:
+async def cancel_handler(message: Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
-        return
-
+        return await message.answer('Сейчас нет действий для отмены')
     await state.clear()
     await message.answer(
         "Отменено",
@@ -99,6 +101,8 @@ async def process_fail(message: Message) -> None:
 
 @router.message(Command('help'))
 async def help_handler(message: types.Message) -> None:
+    x = await checker(message.from_user.id)
+    print(x)
     text = open('commands.txt', 'r').read()
     await message.answer(text=text)
 
